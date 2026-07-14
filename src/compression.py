@@ -1,9 +1,21 @@
 import numpy as np
 
+def truncated_components(matrix: np.ndarray, k: int):
+    """ Return the truncated components of the SVD of a matrix."""
+    U, S, Vt = np.linalg.svd(matrix, full_matrices=False)
+    return U[:, :k], S[:k], Vt[:k, :]
+
+
+def reconstruct_matrix(U_k: np.ndarray, S_k: np.ndarray, Vt_k: np.ndarray) -> np.ndarray:
+    """ Reconstruct the matrix from its truncated SVD components."""
+    return (U_k * S_k) @ Vt_k
+
+
 def compress_grayscale(matrix: np.ndarray, k: int) -> np.ndarray:
     """ Compress a given matrix using singular value decomposition (SVD), retains only the top k singular values."""
-    U, S, Vt = np.linalg.svd(matrix, full_matrices=False)
-    return U[:, :k] @ np.diag(S[:k]) @ Vt[:k, :]
+    U_k, S_k, Vt_k = truncated_components(matrix, k)
+    return reconstruct_matrix(U_k, S_k, Vt_k)
+
 
 def compress_rgb(image: np.ndarray, k: int) -> np.ndarray:
     """ Compress an RGB image by applying SVD separately to each channel."""
@@ -19,7 +31,3 @@ def compress_rgb(image: np.ndarray, k: int) -> np.ndarray:
     compressed = np.stack(channels, axis=2)
     return np.clip(compressed, 0, 255)
 
-def truncated_components(matrix: np.ndarray, k: int):
-    """ Return the truncated components of the SVD of a matrix."""
-    U, S, Vt = np.linalg.svd(matrix, full_matrices=False)
-    return U[:, :k], S[:k], Vt[:k, :]
