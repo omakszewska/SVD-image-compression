@@ -17,7 +17,7 @@ def compress_grayscale(matrix: np.ndarray, k: int) -> np.ndarray:
     return reconstruct_matrix(U_k, S_k, Vt_k)
 
 
-def compress_rgb(image: np.ndarray, k: int) -> np.ndarray:
+def compress_rgb_per_channel(image: np.ndarray, k: int) -> np.ndarray:
     """ Compress an RGB image by applying SVD separately to each channel."""
     if image.ndim != 3 or image.shape[2] != 3:
         raise ValueError("compress_rgb expects an RGB image with shape (H, W, 3)")
@@ -31,3 +31,14 @@ def compress_rgb(image: np.ndarray, k: int) -> np.ndarray:
     compressed = np.stack(channels, axis=2)
     return np.clip(compressed, 0, 255)
 
+def compress_rgb_flattened(image: np.ndarray, k: int) -> np.ndarray:
+    """ Flatten the RGB channels into a single matrix and apply SVD to the whole image."""
+    if image.ndim != 3 or image.shape[2] != 3:
+        raise ValueError("compress_rgb expects an RGB image with shape (H, W, 3)")  
+    
+    flattened_image = image.reshape(image.shape[0], -1)
+    U_k, S_k, Vt_k = truncated_components(flattened_image, k)
+    compressed_flattened = reconstruct_matrix(U_k, S_k, Vt_k)
+    compressed = compressed_flattened.reshape(image.shape)
+    return np.clip(compressed, 0, 255)
+    
