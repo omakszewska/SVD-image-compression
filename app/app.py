@@ -4,8 +4,6 @@ from PIL import Image
 import numpy as np
 import sys
 
-st.title("SVD Image Compression")
-
 BASE_DIR = Path(__file__).resolve().parents[1]
 sys.path.append(str(BASE_DIR))
 RAW_DIR = BASE_DIR / "data" / "raw"
@@ -42,7 +40,7 @@ def build_rgb_variants(array, k):
     }
 
 
-def render_comparison(array, variants):
+def render_comparison(array, variants, k):
     columns = st.columns(len(variants) + 1)
     with columns[0]:
         st.image(array, caption="Original", use_container_width=True)
@@ -64,8 +62,11 @@ source = st.radio("Select an image source", ["Select from existing images", "Upl
 
 image = None
 
+def format_func(f):
+    return f.name
+
 if source == "Select from existing images":
-    selected_image = st.selectbox("Choose an image", existing_images)
+    selected_image = st.selectbox("Choose an image", existing_images, format_func=format_func)
     image = Image.open(selected_image)
 else:
     uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png", "bmp", "webp"])
@@ -85,4 +86,4 @@ if image is not None:
     k = st.select_slider("Select k", options=k_options, value=default_k)
 
     variants = build_grayscale_variants(array, k) if mode == "Grayscale" else build_rgb_variants(array, k)
-    render_comparison(array, variants)
+    render_comparison(array, variants, k)

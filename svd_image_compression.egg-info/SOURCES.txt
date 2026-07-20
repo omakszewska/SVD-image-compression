@@ -1,0 +1,14 @@
+README.md
+pyproject.toml
+src/cli.py
+src/compression.py
+src/io_utils.py
+src/metrics.py
+svd_image_compression.egg-info/PKG-INFO
+svd_image_compression.egg-info/SOURCES.txt
+svd_image_compression.egg-info/dependency_links.txt
+svd_image_compression.egg-info/requires.txt
+svd_image_compression.egg-info/top_level.txt
+tests/test_cli.py
+tests/test_compression.py
+tests/test_metrics.py
