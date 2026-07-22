@@ -32,8 +32,8 @@ def main(argv=None):
     if args.color:
         if args.tucker:
             ranks = [args.rank, args.rank, args.rank]
-            compressed, ranks = compress_rgb_tucker(array, ranks)
-            ratio = tucker_compression_ratio(array.shape, ranks)
+            compressed, ranks_used = compress_rgb_tucker(array, ranks)
+            ratio = tucker_compression_ratio(array.shape, ranks_used)
         elif args.flattened:
             compressed = compress_rgb_flattened(array, args.rank)
             ratio = compression_ratio((array.shape[0], array.shape[1] * 3), args.rank)

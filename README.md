@@ -45,7 +45,7 @@ Clone the repository and install the required dependencies:
 git clone [https://github.com/your-username/svd-image-compression.git](https://github.com/your-username/svd-image-compression.git)
 cd svd-image-compression
 python -m venv venv
-source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+source .venv/bin/activate  # On Windows use `venv\Scripts\activate`
 pip install -r requirements.txt
 ```
 
