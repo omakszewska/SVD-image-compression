@@ -1,5 +1,5 @@
 import numpy as np
-from src.compression import compress_grayscale, truncated_components, compress_rgb_per_channel, compress_rgb_flattened
+from src.compression import compress_grayscale, truncated_components, compress_rgb_per_channel, compress_rgb_flattened, compress_rgb_tucker
 
 def test_compression():
     """ Test the compression and truncated_components functions."""
@@ -23,4 +23,10 @@ def test_rgb_flattened():
     """ Test the compress_rgb_flattened function."""
     rgb_matrix = np.random.rand(4, 4, 3) * 255
     compressed = compress_rgb_flattened(rgb_matrix, 2)
+    assert compressed.shape == rgb_matrix.shape
+
+def test_rgb_tucker():
+    """ Test the compress_rgb_tucker function."""
+    rgb_matrix = np.random.rand(4, 4, 3) * 255
+    compressed = compress_rgb_tucker(rgb_matrix, [2, 2, 2])
     assert compressed.shape == rgb_matrix.shape
