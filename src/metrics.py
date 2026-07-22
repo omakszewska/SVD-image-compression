@@ -10,6 +10,14 @@ def compression_ratio(original_shape: tuple, k: int) -> float:
     compressed_size = k * (h + w + 1) * channels
     return original_size / compressed_size
 
+def tucker_compression_ratio(original_shape: tuple, ranks: list) -> float:
+    """ Calculate the compression ratio for Tucker decomposition given the original shape and the ranks."""
+    original_size = np.prod(original_shape)
+    core_size = np.prod(ranks)
+    factor_sizes = sum(dim * rank for dim, rank in zip(original_shape, ranks))
+    compressed_size = core_size + factor_sizes
+    return original_size / compressed_size
+
 def psnr(original: np.ndarray, reconstructed: np.ndarray) -> float:
     """ Calculate the Peak Signal-to-Noise Ratio (PSNR) between the original and reconstructed images."""
     mse = np.mean((original - reconstructed) ** 2)

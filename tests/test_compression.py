@@ -1,5 +1,11 @@
 import numpy as np
-from src.compression import compress_grayscale, truncated_components, compress_rgb_per_channel, compress_rgb_flattened, compress_rgb_tucker
+from src.compression import (
+    compress_grayscale, 
+    truncated_components, 
+    compress_rgb_per_channel, 
+    compress_rgb_flattened, 
+    compress_rgb_tucker
+)
 
 def test_compression():
     """ Test the compression and truncated_components functions."""

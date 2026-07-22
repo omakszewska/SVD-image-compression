@@ -9,6 +9,7 @@ A Python-based project exploring image compression through Singular Value Decomp
 * **Quality Metrics:** Built-in calculation of Compression Ratio, Peak Signal-to-Noise Ratio (PSNR), and Structural Similarity Index (SSIM).
 * **Comparative Analysis:** Benchmarks comparing SVD against Discrete Cosine Transform (DCT) compression methods.
 * **Command Line Interface:** Easy-to-use CLI for compressing images directly from the terminal.
+* **Tensor Decomposition:** Extends compression beyond matrix-based SVD using Tucker decomposition (Higher-Order SVD), treating RGB images as native 3D tensors and compressing all three modes (height, width, channel) jointly rather than per-channel or flattened.
 
 ---
 
@@ -27,6 +28,12 @@ By keeping only the first $k$ singular values (Truncated SVD), we create an appr
 $$A_k = U_k \Sigma_k V_k^T$$
 
 According to the **Eckart-Young-Mirsky Theorem**, this truncated matrix $A_k$ provides the best possible rank-$k$ approximation of the original image $A$ in both the Frobenius and spectral norms. The error of this reconstruction is directly tied to the sum of the discarded singular values.
+
+Color images are naturally three-dimensional tensors (height × width × channel), not merely stacks of independent 2D matrices. While classical SVD can be adapted to multi-channel data — either per-channel or via flattening two axes into one — Tucker decomposition (a generalization known as Higher-Order SVD, HOSVD) operates on the tensor directly:
+
+$$\mathcal{X} \approx \mathcal{G} \times_1 U^{(1)} \times_2 U^{(2)} \times_3 U^{(3)}$$
+
+Each $U^{(i)}$ is an orthogonal factor matrix obtained via SVD of the tensor's mode-$i$ unfolding, and $\mathcal{G}$ is a compact core tensor encoding the interaction between modes. This yields independent compression ranks per dimension and a mathematically principled alternative to ad-hoc reshaping of multi-channel data into a single matrix.
 
 ---
 
@@ -94,3 +101,4 @@ For deeper dives into the mathematics and comparative analyses, check the `docs/
 * `docs/eckart_young.md`: Proofs and explanations of reconstruction error.
 * `docs/randomized_svd.md`: How randomized linear algebra speeds up the algorithm.
 * `docs/svd_vs_dct.md`: When to use SVD vs. DCT/JPEG approaches.
+* `docs/tucker_decomposition.md`: Introduction to tensor unfolding (mode-$n$ matricization) and Tucker decomposition as a multilinear generalization of SVD.

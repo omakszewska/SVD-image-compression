@@ -48,12 +48,12 @@ def compress_rgb_flattened(image: np.ndarray, k: int) -> np.ndarray:
     compressed = compressed_flattened.reshape(image.shape)
     return np.clip(compressed, 0, 255)
     
-def  compress_rgb_tucker(image:np.ndarray, ranks: list) -> np.ndarray:
+def  compress_rgb_tucker(image:np.ndarray, ranks: list) -> tuple[np.ndarray, list[int]]:
     """ Compress an RGB image using Tucker decomposition."""
     image = image.astype(np.float64)
     _validate_rgb_image(image)
-    
+
     ranks = [min(dim, rank) for dim, rank in zip(image.shape, ranks)]
     core, factors = tucker(image, rank=ranks)
     compressed = tucker_to_tensor((core, factors))
-    return np.clip(compressed, 0, 255)
+    return np.clip(compressed, 0, 255), ranks
