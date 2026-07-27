@@ -33,7 +33,7 @@ Color images are naturally three-dimensional tensors (height × width × channel
 
 $$\mathcal{X} \approx \mathcal{G} \times_1 U^{(1)} \times_2 U^{(2)} \times_3 U^{(3)}$$
 
-Each $U^{(i)}$ is an orthogonal factor matrix obtained via SVD of the tensor's mode-$i$ unfolding, and $\mathcal{G}$ is a compact core tensor encoding the interaction between modes. This yields independent compression ranks per dimension and a mathematically principled alternative to ad-hoc reshaping of multi-channel data into a single matrix.
+Each $U^{(i)}$ is an orthogonal factor matrix obtained via SVD of the tensor's mode- $i$ unfolding, and $\mathcal{G}$ is a compact core tensor encoding the interaction between modes. This yields independent compression ranks per dimension and a mathematically principled alternative to ad-hoc reshaping of multi-channel data into a single matrix.
 
 ---
 
@@ -101,4 +101,4 @@ For deeper dives into the mathematics and comparative analyses, check the `docs/
 * `docs/eckart_young.md`: Proofs and explanations of reconstruction error.
 * `docs/randomized_svd.md`: How randomized linear algebra speeds up the algorithm.
 * `docs/svd_vs_dct.md`: When to use SVD vs. DCT/JPEG approaches.
-* `docs/tucker_decomposition.md`: Introduction to tensor unfolding (mode-$n$ matricization) and Tucker decomposition as a multilinear generalization of SVD.
+* `docs/tucker_decomposition.md`: Introduction to tensor unfolding (mode- $n$ matricization) and Tucker decomposition as a multilinear generalization of SVD.
