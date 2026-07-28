@@ -18,6 +18,7 @@ from src.compression import (
     compress_rgb_flattened,
     compress_rgb_tucker
 )
+from src.randomized_svd import randomized_svd
 from src.metrics import compression_ratio, psnr, ssim, tucker_compression_ratio
 
 @st.cache_data
@@ -28,43 +29,50 @@ def compress_2d_cached(matrix, k):
     U, S, Vt = get_full_svd(matrix)
     return reconstruct_matrix(U[:, :k], S[:k], Vt[:k, :])
 
-def build_grayscale_variants(array, k):
+def compress_2d(matrix, k, use_randomized):
+    if use_randomized:
+        U, S, Vt = randomized_svd(matrix.astype(np.float64), k)
+        return reconstruct_matrix(U, S, Vt)
+    return compress_2d_cached(matrix, k)
+    
+def build_grayscale_variants(array, k, use_randomized):
     start = time.perf_counter()
-    compressed = compress_2d_cached(array, k)
+    compressed = compress_2d(array, k, use_randomized)
     elapsed_ms = (time.perf_counter() - start) * 1000
     ratio = compression_ratio(array.shape, k)
     return {
         "Grayscale": (compressed, ratio, elapsed_ms),
     }
 
-def build_rgb_variants(array, k):
-    start = time.perf_counter()
-    per_channel = np.clip(
-        np.stack([compress_2d_cached(array[:, :, i], k) for i in range(3)], axis=2),
-        0, 255
-    )
-    per_channel_time = (time.perf_counter() - start) * 1000
-    per_channel_ratio = compression_ratio(array.shape, k)
+def build_rgb_variants(array, k, use_randomized, selected_methods):
+    variants = {}
 
-    flattened_shape = (array.shape[0], array.shape[1] * 3)
-    start = time.perf_counter()
-    flattened = np.clip(
-        compress_2d_cached(array.reshape(flattened_shape), k).reshape(array.shape),
-        0, 255
-    )
-    flattened_time = (time.perf_counter() - start) * 1000
-    flattened_ratio = compression_ratio(flattened_shape, k)
+    if "RGB — per channel" in selected_methods:
+        start = time.perf_counter()
+        per_channel = np.clip(
+            np.stack([compress_2d(array[:, :, i], k, use_randomized) for i in range(3)], axis=2),
+            0, 255
+        )
+        elapsed = (time.perf_counter() - start) * 1000
+        variants["RGB — per channel"] = (per_channel, compression_ratio(array.shape, k), elapsed)
 
-    start = time.perf_counter()
-    tucker_compressed, tucker_ranks = compress_rgb_tucker(array, [k, k, k])
-    tucker_time = (time.perf_counter() - start) * 1000
-    tucker_ratio = tucker_compression_ratio(array.shape, tucker_ranks)
+    if "RGB — flattened" in selected_methods:
+        flattened_shape = (array.shape[0], array.shape[1] * 3)
+        start = time.perf_counter()
+        flattened = np.clip(
+            compress_2d(array.reshape(flattened_shape), k, use_randomized).reshape(array.shape),
+            0, 255
+        )
+        elapsed = (time.perf_counter() - start) * 1000
+        variants["RGB — flattened"] = (flattened, compression_ratio(flattened_shape, k), elapsed)
 
-    return {
-        "RGB — per channel": (per_channel, per_channel_ratio, per_channel_time),
-        "RGB — flattened": (flattened, flattened_ratio, flattened_time),
-        "RGB — Tucker": (tucker_compressed, tucker_ratio, tucker_time),
-    }
+    if "RGB — Tucker" in selected_methods:
+        start = time.perf_counter()
+        tucker_compressed, tucker_ranks = compress_rgb_tucker(array, [k, k, k])
+        elapsed = (time.perf_counter() - start) * 1000
+        variants["RGB — Tucker"] = (tucker_compressed, tucker_compression_ratio(array.shape, tucker_ranks), elapsed)
+
+    return variants
 
 
 def render_comparison(array, variants, k):
@@ -128,5 +136,19 @@ if image is not None:
     default_k = min(k_options, key=lambda x: abs(x - target_k))
     k = st.select_slider("Select k", options=k_options, value=default_k)
 
-    variants = build_grayscale_variants(array, k) if mode == "Grayscale" else build_rgb_variants(array, k)
-    render_comparison(array, variants, k)
+    use_randomized = st.checkbox("Use Randomized SVD")
+
+    if mode == "Grayscale":
+        variants = build_grayscale_variants(array, k, use_randomized)
+    else:
+        selected_methods = st.multiselect(
+            "Methods to compare",
+            ["RGB — per channel", "RGB — flattened", "RGB — Tucker"],
+            default=["RGB — per channel", "RGB — flattened"],
+        )
+        variants = build_rgb_variants(array, k, use_randomized, selected_methods)
+
+    if variants:
+        render_comparison(array, variants, k)
+    else:
+        st.info("Select at least one method to compare.")
